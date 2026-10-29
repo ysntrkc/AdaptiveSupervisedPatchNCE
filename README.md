@@ -22,11 +22,12 @@ The MIST dataset contains the following numbers of 1024x1024 H&E-IHC patch pairs
 H&E-to-IHC stain translation results on the MIST images can be found in our [paper](https://arxiv.org/abs/2303.06193).
 
 ## Requirements
-Clone this repo then install the dependencies using:
+Clone this repo then install the dependencies with [uv](https://docs.astral.sh/uv/) (Python 3.12, PyTorch 2.9.1 + CUDA 12.8, works on RTX 50xx):
 ```bash
-conda env create -f environment.yml
+uv sync
+uv run python -m experiments mist train 0
 ```
-Note that we used `pytorch==1.12.1` and a RTX3090 GPU for all experiments.
+Note that the original paper used `pytorch==1.12.1` and a RTX3090 GPU for all experiments.
 
 ## Training from Scratch
 We use `experiments/mist_launcher.py` to generate the command line arguments for training and testing. More details on the parameters used in training our models can be found in that launcher file.
