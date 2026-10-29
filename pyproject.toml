@@ -8,7 +8,7 @@ dependencies = [
     "torchvision==0.24.1",
     "numpy>=2",
     "pillow",
-    "scipy",
+    "scipy<1.18",
     "scikit-image",
     "scikit-learn",
     "opencv-python",

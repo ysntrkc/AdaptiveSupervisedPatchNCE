@@ -1,5 +1,7 @@
+import argparse
 import os
 import random
+import sys
 import torch
 import numpy as np
 from skimage import io
@@ -12,8 +14,12 @@ from pytorch_fid.inception import InceptionV3
 
 from util.perceptual import PerceptualHashValue
 
-targ_dir = '/path/to/real_B'
-pred_dir = '/path/to/fake_B'
+parser = argparse.ArgumentParser(description='PHV, FID, KID, PSNR and SSIM between two folders of images with matching names')
+parser.add_argument('--real_dir', required=True, help='ground-truth IHC images')
+parser.add_argument('--fake_dir', required=True, help='generated images')
+args = parser.parse_args()
+targ_dir = args.real_dir
+pred_dir = args.fake_dir
 
 img_list = [f for f in os.listdir(pred_dir) if f.endswith(('png', 'jpg'))]
 img_format = '.' + img_list[0].split('.')[-1]
@@ -70,7 +76,7 @@ fid_value = calculate_frechet_distance(m1, s1, m2, s2)
 print(f'FID: {fid_value:.2f}')
 
 # KID statistics
-command = f'python3 util/kid_score.py --true {targ_dir} --fake {pred_dir}'
+command = f'{sys.executable} -m util.kid_score --true {targ_dir} --fake {pred_dir}'
 os.system(command)
 
 # PSNR and SSIM statistics
@@ -81,7 +87,7 @@ for i in tqdm(img_list):
     real = io.imread(os.path.join(targ_dir, i + img_format))
     PSNR = peak_signal_noise_ratio(fake, real)
     psnr.append(PSNR)
-    SSIM = structural_similarity(fake, real, multichannel=True)
+    SSIM = structural_similarity(fake, real, channel_axis=2)
     ssim.append(SSIM)
 average_psnr = sum(psnr)/len(psnr)
 average_ssim = sum(ssim)/len(ssim)

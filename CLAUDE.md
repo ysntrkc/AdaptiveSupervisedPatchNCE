@@ -68,9 +68,12 @@ BCI ve HER2match için aynısı: `BCI/{HE,IHC}/{train,test}`, `HER2match/{HE,IHC
 
 - `--asp_loss_mode lambda_*` ile **`--n_epochs_decay 0` sıfıra böler** (`asp_loss.py`: `m = 1/(1-k)`).
   Smoke testte en az 1 decay epoch ver.
-- `evaluate.py` scripti argümansız: `targ_dir`/`pred_dir` dosyanın başında sabit (`/path/to/...`), elle düzenlenmeli.
-  Ayrıca `structural_similarity(fake, real, multichannel=True)` skimage 0.26'da **hata verir** →
-  `channel_axis=2` yapılmalı. KID için `python3 util/kid_score.py` çağırır; `uv run` içinden çalıştır ki venv python'u kullanılsın.
+- Değerlendirme: `uv run python evaluate.py --real_dir <run>/<test_dir>/images/real_B --fake_dir <run>/<test_dir>/images/fake_B`
+  (test.py görselleri `images/{real_A,fake_B,real_B}/` alt klasörlerine aynı adlarla yazar). Sonuçları dosyaya
+  değil stdout'a yazar; `> <run>/<test_dir>/evaluation.txt` ile kaydet. 2026-10-29'da düzeltildi: argümanlar
+  (eskiden sabit `/path/to/...`), SSIM `channel_axis=2` (skimage 0.26), KID `python -m util.kid_score` olarak
+  çağrılıyor (script olarak çağrılınca `util/html.py` stdlib `html`'i gölgeleyip torchvision importunu kırıyordu).
+- `scipy<1.18` sabit: pytorch-fid 0.3.0 `linalg.sqrtm(disp=...)` kullanıyor, scipy 1.18 bunu kaldırdı.
 - `test.py`'de `--num_test` varsayılanı **50**; tam test için `--num_test 1000` ver.
 - `test.py` `<checkpoints_dir>/<name>/test_opt.txt`'nin üzerine yazar.
 - `--dataroot` varsayılanı `placeholder`, `--dataset_mode` varsayılanı `unaligned`, `--model` varsayılanı `cut` — her zaman açıkça ver.
