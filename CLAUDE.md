@@ -8,10 +8,11 @@ Tezde H&E→IHC için karşılaştırma yöntemi / DWT kaybının ekleneceği ik
 **Tur script'i:** `scripts/baseline_round.sh [variant] [datasets...]` — 3 veri setinde (varsayılan `BCI MIST/HER2 HER2match`)
 makale ayarlarıyla eğitim → tam 1024 test → BCI'nin `evaluate.py`'si ile değerlendirme. Çıktı `/mnt/d/thesis/runs/asp/<variant>/run_<ts>_<ds>/`.
 Ayrık: `setsid nohup scripts/baseline_round.sh > /mnt/d/thesis/runs/_logs/asp_round.log 2>&1 &`. Tahmini süre: BCI ~11 sa, MIST ~13 sa,
-HER2match ~30 sa (batch 1, crop 512; 0.25 s/iter ölçümünden). **Henüz GPU'da uçtan uca denenmedi**: ilk çalıştırmadan önce
-`RUNS=/tmp/x EXTRA_TRAIN="--max_dataset_size 4 --n_epochs 1 --n_epochs_decay 1" EXTRA_TEST="--num_test 3" scripts/baseline_round.sh baseline MIST/HER2` ile 2 dk smoke test yap.
+HER2match ~30 sa (batch 1, crop 512; 0.25 s/iter ölçümünden). 2026-10-30'da GPU'da uçtan uca smoke testi geçti (~2 dk):
+`RUNS=/tmp/x EXTRA_TRAIN="--max_dataset_size 4 --n_epochs 1 --n_epochs_decay 1 --save_epoch_freq 1" EXTRA_TEST="--num_test 3" scripts/baseline_round.sh baseline MIST/HER2`
+(`--save_epoch_freq 1` şart: yoksa 2 epoch'ta hiç checkpoint kaydedilmez ve test `latest_net_G.pth` bulamaz).
 
-**Durum (2026-10-29):** Bu makinede henüz tam bir eğitim yapılmadı. Önceki deneme (`runs/_archive/asp_her2_asp_failed`)
+**Durum (2026-10-30):** Bu makinede henüz tam bir eğitim yapılmadı. Önceki deneme (`runs/_archive/asp_her2_asp_failed`)
 torch 1.12 RTX 5070'te çalışmadığı için çöktü. uv ortamında (torch 2.9.1+cu128) kısa train + test smoke testi geçti;
 kodda değişiklik gerekmedi.
 
@@ -81,6 +82,9 @@ BCI ve HER2match için aynısı: `BCI/{HE,IHC}/{train,test}`, `HER2match/{HE,IHC
   çağrılıyor (script olarak çağrılınca `util/html.py` stdlib `html`'i gölgeleyip torchvision importunu kırıyordu).
 - `scipy<1.18` sabit: pytorch-fid 0.3.0 `linalg.sqrtm(disp=...)` kullanıyor, scipy 1.18 bunu kaldırdı.
 - **CPU desteklenmiyor:** `gauss_pyramid.py` çekirdeği CUDA'da, `test.py` `DataParallel` için GPU listesi bekliyor.
+- `test.py` `images/real_A/` ve `images/real_B/`'yi kaynak tile ile piksel düzeyinde aynıysa (±1, `util.same_pixels`)
+  veri setindeki dosyaya **mutlak symlink** olarak yazar (`util/visualizer.py:save_images(sources=)`; tam 1024 testte yer ~1/3'e iner).
+  Yazmadan önce eski dosya/link'i siler, link üzerinden veri setine yazmaz. `fake_B` her zaman normal dosya.
 - `test.py`'de `--num_test` varsayılanı **50**; tam test için `--num_test 1000` ver.
 - `test.py` `<checkpoints_dir>/<name>/test_opt.txt`'nin üzerine yazar.
 - `--dataroot` varsayılanı `placeholder`, `--dataset_mode` varsayılanı `unaligned`, `--model` varsayılanı `cut` — her zaman açıkça ver.

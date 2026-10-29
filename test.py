@@ -66,5 +66,9 @@ if __name__ == '__main__':
         img_path = model.get_image_paths()     # get image paths
         if i % 5 == 0:  # save images to an HTML file
             print('processing (%04d)-th image... %s' % (i, img_path))
-        save_images(webpage, visuals, img_path, width=opt.display_winsize)
+        a, b = data['A_paths'][0], data['B_paths'][0]
+        if opt.direction == 'BtoA':
+            a, b = b, a
+        # real images of a full-image test are linked to the dataset tiles instead of copied
+        save_images(webpage, visuals, img_path, width=opt.display_winsize, sources={'real_A': a, 'real_B': b})
     webpage.save()  # save the HTML
