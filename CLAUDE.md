@@ -5,6 +5,12 @@ Fork: `ysntrkc/AdaptiveSupervisedPatchNCE` ← upstream `lifangda01/AdaptiveSupe
 Tezde H&E→IHC için karşılaştırma yöntemi / DWT kaybının ekleneceği ikinci mimari olarak kullanılacak.
 Çalışma alanı kuralları, veri setleri ve run düzeni için `../CLAUDE.md`'yi de oku.
 
+**Tur script'i:** `scripts/baseline_round.sh [variant] [datasets...]` — 3 veri setinde (varsayılan `BCI MIST/HER2 HER2match`)
+makale ayarlarıyla eğitim → tam 1024 test → BCI'nin `evaluate.py`'si ile değerlendirme. Çıktı `/mnt/d/thesis/runs/asp/<variant>/run_<ts>_<ds>/`.
+Ayrık: `setsid nohup scripts/baseline_round.sh > /mnt/d/thesis/runs/_logs/asp_round.log 2>&1 &`. Tahmini süre: BCI ~11 sa, MIST ~13 sa,
+HER2match ~30 sa (batch 1, crop 512; 0.25 s/iter ölçümünden). **Henüz GPU'da uçtan uca denenmedi**: ilk çalıştırmadan önce
+`RUNS=/tmp/x EXTRA_TRAIN="--max_dataset_size 4 --n_epochs 1 --n_epochs_decay 1" EXTRA_TEST="--num_test 3" scripts/baseline_round.sh baseline MIST/HER2` ile 2 dk smoke test yap.
+
 **Durum (2026-10-29):** Bu makinede henüz tam bir eğitim yapılmadı. Önceki deneme (`runs/_archive/asp_her2_asp_failed`)
 torch 1.12 RTX 5070'te çalışmadığı için çöktü. uv ortamında (torch 2.9.1+cu128) kısa train + test smoke testi geçti;
 kodda değişiklik gerekmedi.
@@ -40,7 +46,7 @@ göreli; yol 1'i kullanacaksan bunları `/mnt/d/thesis/...` yollarına çevir.
 `dataset_mode aligned` burada **ayrı klasörler** bekler: `<dataroot>/{trainA,trainB,testA,testB}` (veya `valA/valB`;
 `phase=test` iken `testA` yoksa `valA` kullanılır). Dosya adları A ve B'de aynı olmalı. BCI'deki yan yana AB formatını kullanmaz.
 
-D:'deki MIST HER2 `HE/{train,test}` + `IHC/{train,test}` şeklinde. Kopyalamadan bir görünüm klasörü kur:
+Hazır görünümler (symlink): `/mnt/d/thesis/datasets/{BCI,MIST/HER2,HER2match}/asp/`. Yeni veri seti için aynı şekilde kur:
 ```bash
 V=<view_dir>; M=/mnt/d/thesis/datasets/MIST/HER2; mkdir -p $V
 ln -sfn $M/HE/train $V/trainA; ln -sfn $M/IHC/train $V/trainB; ln -sfn $M/HE/test $V/testA; ln -sfn $M/IHC/test $V/testB
@@ -74,6 +80,7 @@ BCI ve HER2match için aynısı: `BCI/{HE,IHC}/{train,test}`, `HER2match/{HE,IHC
   (eskiden sabit `/path/to/...`), SSIM `channel_axis=2` (skimage 0.26), KID `python -m util.kid_score` olarak
   çağrılıyor (script olarak çağrılınca `util/html.py` stdlib `html`'i gölgeleyip torchvision importunu kırıyordu).
 - `scipy<1.18` sabit: pytorch-fid 0.3.0 `linalg.sqrtm(disp=...)` kullanıyor, scipy 1.18 bunu kaldırdı.
+- **CPU desteklenmiyor:** `gauss_pyramid.py` çekirdeği CUDA'da, `test.py` `DataParallel` için GPU listesi bekliyor.
 - `test.py`'de `--num_test` varsayılanı **50**; tam test için `--num_test 1000` ver.
 - `test.py` `<checkpoints_dir>/<name>/test_opt.txt`'nin üzerine yazar.
 - `--dataroot` varsayılanı `placeholder`, `--dataset_mode` varsayılanı `unaligned`, `--model` varsayılanı `cut` — her zaman açıkça ver.
