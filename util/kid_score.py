@@ -440,8 +440,10 @@ if __name__ == '__main__':
                         help='GPU to use (leave blank for CPU only)')
     parser.add_argument('--model', default='inception', type=str,
                         help='inception or lenet')
+    parser.add_argument('--seed', type=int, default=0, help='seed for the random KID subsets')
     args = parser.parse_args()
     print(args)
+    np.random.seed(args.seed)
     os.environ['CUDA_VISIBLE_DEVICES'] = args.gpu
     paths = [args.true] + args.fake
 
