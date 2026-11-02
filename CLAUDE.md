@@ -85,6 +85,8 @@ BCI ve HER2match için aynısı: `BCI/{HE,IHC}/{train,test}`, `HER2match/{HE,IHC
 - `test.py` `images/real_A/` ve `images/real_B/`'yi kaynak tile ile piksel düzeyinde aynıysa (±1, `util.same_pixels`)
   veri setindeki dosyaya **mutlak symlink** olarak yazar (`util/visualizer.py:save_images(sources=)`; tam 1024 testte yer ~1/3'e iner).
   Yazmadan önce eski dosya/link'i siler, link üzerinden veri setine yazmaz. `fake_B` her zaman normal dosya.
+- `--seed` (varsayılan 0, BCI reposuyla aynı: python/numpy/torch) 2026-11-02'de eklendi; daha önceki run'lar seed'siz.
+  `cudnn.benchmark` açık, eğitim bit düzeyinde deterministik değil.
 - `test.py`'de `--num_test` varsayılanı **50**; tam test için `--num_test 1000` ver.
 - `test.py` `<checkpoints_dir>/<name>/test_opt.txt`'nin üzerine yazar.
 - `--dataroot` varsayılanı `placeholder`, `--dataset_mode` varsayılanı `unaligned`, `--model` varsayılanı `cut` — her zaman açıkça ver.

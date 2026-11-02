@@ -1,5 +1,7 @@
 import argparse
 import os
+import random
+import numpy as np
 from util import util
 import torch
 import models
@@ -71,6 +73,7 @@ class BaseOptions():
 
         # FDL:
         parser.add_argument('--weight_norm', type=str, default='none', choices=['none', 'spectral'], help='chooses which weight norm layer to use.')
+        parser.add_argument('--seed', type=int, default=0, help='seed for python/numpy/torch RNGs (random crops, flips, init)')
 
         self.initialized = True
         return parser
@@ -150,6 +153,10 @@ class BaseOptions():
         if opt.suffix:
             suffix = ('_' + opt.suffix.format(**vars(opt))) if opt.suffix != '' else ''
             opt.name = opt.name + suffix
+
+        random.seed(opt.seed)
+        np.random.seed(opt.seed)
+        torch.manual_seed(opt.seed)
 
         self.print_options(opt)
 
